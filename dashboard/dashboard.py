@@ -31,7 +31,7 @@ def create_hum_tabel(df):
     return hum_tabel
 
 # Memasukkan data 
-all_df = pd.read_csv(r"D:\kuliah fahmi\semester 6 full Dbs\DBS FOUNDATION\Submission Analisis data\dashboard\all_data.csv")
+all_df = pd.read_csv("dashboard\all_data.csv")
 all_df['dteday'] = pd.to_datetime(all_df['dteday'])
 all_df['year'] = all_df['dteday'].dt.year
 all_df.sort_values(by="dteday", inplace=True)
