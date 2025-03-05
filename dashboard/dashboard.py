@@ -1,105 +1,68 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sbn
 import seaborn as sns
 import streamlit as st
 
-#create weekday tabel 
-def create_weekday_tabel(df):
-    weekday_per_tahun=df[df['year'] == tahun]
-    weekday_tabel = weekday_per_tahun.groupby(by=['weekday']).agg({"cnt": "mean"})
-    return weekday_tabel
-
-#create season tabel 
-def create_season_tabel(df):
-    season_per_tahun=df[df['dteday'].dt.year == tahun]
-    season_tabel = season_per_tahun.groupby(by="season").agg({"cnt": "mean"})
-    return season_tabel
-
-#create weathersit tabel 
-def create_weathersit_tabel(df):
-    weathersit_per_tahun=df[df['year'] == tahun]
-    weathersit_tabel = weathersit_per_tahun.groupby(by=['weathersit']).agg({
-        "cnt": "mean"
-    })
-    return weathersit_tabel
-
-def create_hum_tabel(df):
-    hum_per_tahun=df[df['year'] == tahun]
-    hum_tabel = df[['hum','cnt']]
-    return hum_tabel
-
-# Memasukkan data 
-all_df = pd.read_csv("dashboard\all_data.csv")
+# Load Data
+all_df = pd.read_csv("dashboard/all_data.csv")
 all_df['dteday'] = pd.to_datetime(all_df['dteday'])
 all_df['year'] = all_df['dteday'].dt.year
 all_df.sort_values(by="dteday", inplace=True)
-all_df['year'] = all_df['dteday'].dt.year
-all_df.reset_index(inplace=True)
+all_df.reset_index(drop=True, inplace=True)
 
-datetime_columns = ["dteday"]
-all_df.sort_values(by="dteday", inplace=True)
-all_df['year'] = all_df['dteday'].dt.year
-all_df.reset_index(inplace=True)
+# Streamlit Theme
+st.set_page_config(page_title="Dicoding Bikers Dashboard", layout="wide")
 
-min_date = all_df["dteday"].min()
-max_date = all_df["dteday"].max()
+# Custom CSS for Styling
+st.markdown("""
+    <style>
+        .big-font { font-size:24px !important; }
+        .highlight { background-color: #4CAF50; color: black; padding: 5px; border-radius: 5px; }
+        .stApp { background-color: #000000; }
+    </style>
+""", unsafe_allow_html=True)
 
-#Membuat dataset 
-tahun = st.selectbox(label = 'Choose The Year', options = (2011,2012), key='year_selectbox')
-weekday_df=create_weekday_tabel(all_df)
-season_df=create_season_tabel(all_df)
-weathersit_df=create_weathersit_tabel(all_df)
-hum_df=create_hum_tabel(all_df)
+# Pilih Tahun
+tahun = st.slider("Pilih Tahun", min_value=2011, max_value=2012, value=2011)
 
-#Membuat bagian pertama dashboard
-st.title("Dicoding Bikers Dashboard")
-st.header("Let's Bike!!")
-st.text('Hello Bikers! Welcome to Dicoding Bikers Dashboard! Lets explore about the truth of our service.')
-tahun = st.selectbox(
-    label = 'Choose The Year',
-    options = (2011,2012)
-    )
-st.write('Your Choose: ', tahun)
-tab1, tab2, tab3= st.tabs(["Weekday","Weathersit","Season"])
+# Filter Data
+weekday_df = all_df[all_df['year'] == tahun].groupby("weekday")["cnt"].mean().reset_index()
+season_df = all_df[all_df['year'] == tahun].groupby("season")["cnt"].mean().reset_index()
+weathersit_df = all_df[all_df['year'] == tahun].groupby("weathersit")["cnt"].mean().reset_index()
 
-#membuat bagian tab
-with tab1 : 
-    fig, ax = plt.subplots(nrows=1, figsize=(30, 6))
+# Judul
+st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🚴‍♂️ Dicoding Bikers Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("<p class='big-font'>Selamat datang di Dicoding Bikers Dashboard! Mari kita eksplorasi tren penggunaan sepeda 🚲</p>", unsafe_allow_html=True)
 
-    colors = ["#72BCD4", "#72BCD4", "#72BCD4", "#72BCD4", "#72BCD4"]
+# Tabs
+tab1, tab2, tab3 = st.tabs(["📆 Weekday", "⛅ Weathersit", "🌱 Season"])
 
-    sns.barplot(x='weekday', y='cnt', data=weekday_df.sort_values(by='cnt', ascending=False))
-    ax.set_ylabel("Jumlah Pengunjung")
-    ax.set_xlabel("Hari")
-    ax.set_title("Jumlah pengunjung setiap harinya", loc="center", fontsize=18)
-    ax.tick_params(axis ='y', labelsize=15)
+# 🎨 Custom Palette
+colors = sns.color_palette("coolwarm", 10)
 
+def create_barplot(df, x_col, y_col, title, xlabel):
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.barplot(x=x_col, y=y_col, data=df, palette=colors, ax=ax)
+    ax.set_xlabel(xlabel, fontsize=14)
+    ax.set_ylabel("Jumlah Pengunjung", fontsize=14)
+    ax.set_title(title, fontsize=16, fontweight='bold')
     st.pyplot(fig)
 
-with tab2 : 
-    fig, ax = plt.subplots(nrows=1, figsize=(30, 6))
+with tab1:
+    st.subheader("📅 Jumlah Pengunjung per Hari")
+    st.write("Berikut adalah rata-rata jumlah pengunjung per hari dalam setahun:")
+    st.dataframe(weekday_df.style.format({"cnt": "{:.2f}"}))
+    create_barplot(weekday_df, "weekday", "cnt", "Jumlah Pengunjung Berdasarkan Hari", "Hari")
 
-    colors = ["#72BCD4", "#72BCD4", "#72BCD4", "#72BCD4", "#72BCD4"]
+with tab2:
+    st.subheader("🌦️ Pengaruh Cuaca terhadap Jumlah Pengunjung")
+    st.write("Bagaimana cuaca mempengaruhi jumlah pengunjung sepeda?")
+    st.dataframe(weathersit_df.style.format({"cnt": "{:.2f}"}))
+    create_barplot(weathersit_df, "weathersit", "cnt", "Jumlah Pengunjung Berdasarkan Cuaca", "Cuaca")
 
-    sns.barplot(x='weathersit', y='cnt', data=weathersit_df.sort_values(by='cnt', ascending=False))
-    ax.set_ylabel("Jumlah Pengunjung")
-    ax.set_xlabel("Cuaca")
-    ax.set_title("Jumlah pengunjung setiap cuaca", loc="center", fontsize=18)
-    ax.tick_params(axis ='y', labelsize=15)
-
-    st.pyplot(fig)
-
-with tab3: 
-    fig, ax = plt.subplots(nrows=1, figsize=(30, 6))
-
-    colors = ["#72BCD4", "#72BCD4", "#72BCD4", "#72BCD4", "#72BCD4"]
-
-    sns.barplot(x='season', y='cnt', data=season_df.sort_values(by='cnt', ascending=False))
-    ax.set_ylabel("Jumlah Pengunjung")
-    ax.set_xlabel("Season")
-    ax.set_title("Jumlah pengunjung setiap seasonnya", loc="center", fontsize=18)
-    ax.tick_params(axis ='y', labelsize=15)
-
-    st.pyplot(fig)
+with tab3:
+    st.subheader("🌍 Jumlah Pengunjung Berdasarkan Musim")
+    st.write("Berapa banyak pengunjung di setiap musim?")
+    st.dataframe(season_df.style.format({"cnt": "{:.2f}"}))
+    create_barplot(season_df, "season", "cnt", "Jumlah Pengunjung Berdasarkan Musim", "Musim")
