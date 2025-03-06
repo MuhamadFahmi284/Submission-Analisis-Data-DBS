@@ -108,7 +108,7 @@ with tab3:
 
     # Plot the bar chart for season comparison
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(season_df['season'], season_df['cnt'], color=['skyblue', 'lightcoral', 'lightgreen', 'gold'])
+    ax.bar(season_df['season'], season_df['cnt'], color=['skyblue'])
     ax.set_xlabel('Musim')
     ax.set_ylabel('Jumlah Pengunjung (cnt)')
     ax.set_title('Perbandingan Jumlah Pengunjung per Musim')
