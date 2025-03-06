@@ -27,9 +27,9 @@ st.markdown("""
 tahun = st.slider("Pilih Tahun", min_value=2011, max_value=2012, value=2011)
 
 # Filter Data
-weekday_df = all_df[all_df['year'] == tahun].groupby("weekday")["cnt"].sum().reset_index()
-season_df = all_df[all_df['year'] == tahun].groupby("season")["cnt"].sum().reset_index()
-weathersit_df = all_df[all_df['year'] == tahun].groupby("weathersit")["cnt"].sum().reset_index()
+weekday_df = all_df[all_df['year'] == tahun].groupby("weekday")["cnt"].mean().reset_index()
+season_df = all_df[all_df['year'] == tahun].groupby("season")["cnt"].mean().reset_index()
+weathersit_df = all_df[all_df['year'] == tahun].groupby("weathersit")["cnt"].mean().reset_index()
 
 # Judul
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🚴‍♂️ Dicoding Bikers Dashboard</h1>", unsafe_allow_html=True)
