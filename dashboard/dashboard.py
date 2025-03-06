@@ -23,13 +23,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Pilih Tahun
+# Pilih Tahun (Slider untuk memilih tahun)
 tahun = st.slider("Pilih Tahun", min_value=2011, max_value=2012, value=2011)
 
-# Filter Data
-weekday_df = all_df[all_df['year'] == tahun].groupby("weekday")["cnt"].mean().reset_index()
-season_df = all_df[all_df['year'] == tahun].groupby("season")["cnt"].mean().reset_index()
-weathersit_df = all_df[all_df['year'] == tahun].groupby("weathersit")["cnt"].mean().reset_index()
+# Filter Data berdasarkan tahun yang dipilih
+filtered_df = all_df[all_df['year'] == tahun]
+
+# Grouping berdasarkan weekday, season, dan weathersit setelah filtering
+weekday_df = filtered_df.groupby("weekday")["cnt"].mean().reset_index()
+season_df = filtered_df.groupby("season")["cnt"].mean().reset_index()
+weathersit_df = filtered_df.groupby("weathersit")["cnt"].mean().reset_index()
 
 # Judul
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🚴‍♂️ Dicoding Bikers Dashboard</h1>", unsafe_allow_html=True)
@@ -48,13 +51,13 @@ def create_barplot(df, x_col, y_col, title, xlabel):
     ax.set_ylabel("Jumlah Pengunjung", fontsize=14)
     ax.set_title(title, fontsize=16, fontweight='bold')
     st.pyplot(fig)
+
 with tab1:
     st.subheader("📅 Perbandingan Jumlah Peminjam untuk Setiap Hari")
     st.write("Berikut adalah perbandingan jumlah peminjam berdasarkan hari dalam seminggu:")
     
-    # Group by weekday and calculate the sum of 'cnt'
-    day_df = all_df.groupby(by=["weekday"]).agg({"cnt": "sum"}).reset_index()
-    day_df_pivot_weekday = all_df.groupby('weekday').agg({'cnt': 'sum'}).reset_index()
+    # Group by weekday and calculate the sum of 'cnt' for the selected year
+    day_df_pivot_weekday = filtered_df.groupby('weekday').agg({'cnt': 'sum'}).reset_index()
 
     # Display the DataFrame
     st.dataframe(day_df_pivot_weekday.style.format({"cnt": "{:.2f}"}))
@@ -76,10 +79,10 @@ with tab2:
     
     # Map weather conditions to labels
     weather_mapping = {1: 'Cerah', 2: 'Berkabut', 3: 'Hujan Ringan', 4: 'Hujan Lebat'}
-    all_df['weathersit'] = all_df['weathersit'].map(weather_mapping)
+    filtered_df['weathersit'] = filtered_df['weathersit'].map(weather_mapping)
     
-    # Group by weathersit and calculate the sum of 'cnt'
-    pivot_weathersit = all_df.groupby('weathersit').agg({'cnt': 'sum'}).reset_index()
+    # Group by weathersit and calculate the sum of 'cnt' for the selected year
+    pivot_weathersit = filtered_df.groupby('weathersit').agg({'cnt': 'sum'}).reset_index()
 
     # Display the DataFrame
     st.dataframe(pivot_weathersit.style.format({"cnt": "{:.2f}"}))
