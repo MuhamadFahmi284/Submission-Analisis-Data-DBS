@@ -63,16 +63,6 @@ with tab2:
 
 with tab3:
     st.subheader("🌍 Jumlah Pengunjung Berdasarkan Musim")
-    data = {'season': ['Dingin', 'Gugur', 'Panas', 'Semi'],
-            'cnt': [841613, 1061129, 918589, 471348]}
-    df = pd.DataFrame(data)
-
-    # Membuat grafik batang
-    plt.figure(figsize=(10, 6))
-    plt.bar(df['season'], df['cnt'], color=['skyblue', 'lightcoral', 'lightgreen', 'gold'])
-    plt.xlabel('Musim')
-    plt.ylabel('Jumlah Pengunjung (cnt)')
-    plt.title('Perbandingan Jumlah Pengunjung per Musim')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
+    st.write("Berapa banyak pengunjung di setiap musim?")
+    st.dataframe(season_df.style.format({"cnt": "{:.2f}"}))
+    create_barplot(season_df, "season", "cnt", "Jumlah Pengunjung Berdasarkan Musim", "Musim")
