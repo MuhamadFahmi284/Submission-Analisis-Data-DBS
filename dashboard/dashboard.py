@@ -48,21 +48,68 @@ def create_barplot(df, x_col, y_col, title, xlabel):
     ax.set_ylabel("Jumlah Pengunjung", fontsize=14)
     ax.set_title(title, fontsize=16, fontweight='bold')
     st.pyplot(fig)
-
 with tab1:
-    st.subheader("📅 Jumlah Pengunjung per Hari")
-    st.write("Berikut adalah rata-rata jumlah pengunjung per hari dalam setahun:")
-    st.dataframe(weekday_df.style.format({"cnt": "{:.2f}"}))
-    create_barplot(weekday_df, "weekday", "cnt", "Jumlah Pengunjung Berdasarkan Hari", "Hari")
+    st.subheader("📅 Perbandingan Jumlah Peminjam untuk Setiap Hari")
+    st.write("Berikut adalah perbandingan jumlah peminjam berdasarkan hari dalam seminggu:")
+    
+    # Group by weekday and calculate the sum of 'cnt'
+    day_df = all_df.groupby(by=["weekday"]).agg({"cnt": "sum"}).reset_index()
+    day_df_pivot_weekday = all_df.groupby('weekday').agg({'cnt': 'sum'}).reset_index()
 
+    # Display the DataFrame
+    st.dataframe(day_df_pivot_weekday.style.format({"cnt": "{:.2f}"}))
+
+    # Plot the bar chart for weekday comparison
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.bar(day_df_pivot_weekday['weekday'], day_df_pivot_weekday['cnt'], color='blue')
+    ax.set_xlabel('Hari dalam Seminggu')
+    ax.set_ylabel('Jumlah Peminjam')
+    ax.set_title('Perbandingan Jumlah Peminjam untuk Setiap Hari')
+    ax.set_xticks(range(7))
+    ax.set_xticklabels(['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'])
+    st.pyplot(fig)
+
+# Pertanyaan 2 : Bagaimana perbandingan jumlah pengunjung untuk setiap weathersit?
 with tab2:
-    st.subheader("🌦️ Pengaruh Cuaca terhadap Jumlah Pengunjung")
-    st.write("Bagaimana cuaca mempengaruhi jumlah pengunjung sepeda?")
-    st.dataframe(weathersit_df.style.format({"cnt": "{:.2f}"}))
-    create_barplot(weathersit_df, "weathersit", "cnt", "Jumlah Pengunjung Berdasarkan Cuaca", "Cuaca")
+    st.subheader("🌦️ Perbandingan Jumlah Peminjam Berdasarkan Cuaca")
+    st.write("Bagaimana cuaca mempengaruhi jumlah peminjam sepeda?")
+    
+    # Map weather conditions to labels
+    weather_mapping = {1: 'Cerah', 2: 'Berkabut', 3: 'Hujan Ringan', 4: 'Hujan Lebat'}
+    all_df['weathersit'] = all_df['weathersit'].map(weather_mapping)
+    
+    # Group by weathersit and calculate the sum of 'cnt'
+    pivot_weathersit = all_df.groupby('weathersit').agg({'cnt': 'sum'}).reset_index()
 
+    # Display the DataFrame
+    st.dataframe(pivot_weathersit.style.format({"cnt": "{:.2f}"}))
+
+    # Plot the bar chart for weathersit comparison
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.bar(pivot_weathersit['weathersit'], pivot_weathersit['cnt'], color='green')
+    ax.set_xlabel('Kondisi Cuaca')
+    ax.set_ylabel('Jumlah Peminjam')
+    ax.set_title('Perbandingan Jumlah Peminjam Berdasarkan Kondisi Cuaca')
+    st.pyplot(fig)
+
+# Pertanyaan 3 : Bagaimana perbandingan jumlah pengunjung untuk setiap season?
 with tab3:
-    st.subheader("🌍 Jumlah Pengunjung Berdasarkan Musim")
+    st.subheader("🌍 Perbandingan Jumlah Pengunjung Berdasarkan Musim")
     st.write("Berapa banyak pengunjung di setiap musim?")
-    st.dataframe(season_df.style.format({"cnt": "{:.2f}"}))
-    create_barplot(season_df, "season", "cnt", "Jumlah Pengunjung Berdasarkan Musim", "Musim")
+    
+    # Data for seasons
+    data = {'season': ['Dingin', 'Gugur', 'Panas', 'Semi'],
+            'cnt': [841613, 1061129, 918589, 471348]}
+    df_season = pd.DataFrame(data)
+
+    # Display the DataFrame
+    st.dataframe(df_season.style.format({"cnt": "{:.2f}"}))
+
+    # Plot the bar chart for season comparison
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(df_season['season'], df_season['cnt'], color=['skyblue', 'lightcoral', 'lightgreen', 'gold'])
+    ax.set_xlabel('Musim')
+    ax.set_ylabel('Jumlah Pengunjung (cnt)')
+    ax.set_title('Perbandingan Jumlah Pengunjung per Musim')
+    ax.set_xticklabels(df_season['season'], rotation=45)
+    st.pyplot(fig)
