@@ -100,19 +100,18 @@ with tab3:
     st.subheader("🌍 Perbandingan Jumlah Pengunjung Berdasarkan Musim")
     st.write("Berapa banyak pengunjung di setiap musim?")
     
-    # Data for seasons
-    data = {'season': ['Dingin', 'Gugur', 'Panas', 'Semi'],
-            'cnt': [841613, 1061129, 918589, 471348]}
-    df_season = pd.DataFrame(data)
+    # Group by season and calculate the sum of 'cnt' for the selected year
+    season_df = filtered_df.groupby('season')['cnt'].sum().reset_index()
 
     # Display the DataFrame
-    st.dataframe(df_season.style.format({"cnt": "{:.2f}"}))
+    st.dataframe(season_df.style.format({"cnt": "{:.2f}"}))
 
     # Plot the bar chart for season comparison
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(df_season['season'], df_season['cnt'], color=['skyblue'])
+    ax.bar(season_df['season'], season_df['cnt'], color=['skyblue', 'lightcoral', 'lightgreen', 'gold'])
     ax.set_xlabel('Musim')
     ax.set_ylabel('Jumlah Pengunjung (cnt)')
     ax.set_title('Perbandingan Jumlah Pengunjung per Musim')
-    ax.set_xticklabels(df_season['season'], rotation=45)
+    ax.set_xticklabels(season_df['season'], rotation=45)
     st.pyplot(fig)
+
